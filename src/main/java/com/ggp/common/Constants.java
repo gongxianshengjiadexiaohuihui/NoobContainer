@@ -28,5 +28,13 @@ public class Constants {
      * 默认端口
      */
     public static final Integer DEFAULT_PORT = 8080;
+    /**
+     * 错误消息 404
+     */
+    public static final String ERROR_MESSAGE_404 = "HTTP/1.1 404 File Not Found\r\n"
+                                                    +"Content-Type: text/html\r\n"
+                                                    +"Content-Length: 23\r\n"
+                                                    +"\r\n"
+                                                    +"<h1>File Not Found</h1>";
 
 }

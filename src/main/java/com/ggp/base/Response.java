@@ -1,5 +1,10 @@
 package com.ggp.base;
 
+import com.ggp.common.Constants;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -26,14 +31,42 @@ import java.io.OutputStream;
  * 参考 @Request
  */
 public class Response {
-
+    private static final int BUFFER_SIZE = 1024;
+    private Request request;
+    private OutputStream outputStream;
     public Response(OutputStream outputStream) {
-
+       this.outputStream = outputStream;
     }
 
     public void setRequest(Request request) {
+        this.request = request;
     }
 
-    public void sendStaticResource() {
+    /**
+     * 根据uri读取对应的静态资源
+     * @throws IOException
+     */
+    public void sendStaticResource() throws IOException {
+        byte[] bytes = new byte[BUFFER_SIZE];
+        FileInputStream fis = null;
+        File file = new File(Constants.WEB_ROOT,request.getUri());
+        try {
+            if(file.exists()){
+                fis = new FileInputStream(file);
+                int ch;
+                while ((ch = fis.read(bytes,0,BUFFER_SIZE))!=-1){
+                    outputStream.write(bytes);
+                }
+            }else{
+                outputStream.write(Constants.ERROR_MESSAGE_404.getBytes());
+            }
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(null != fis){
+                fis.close();
+            }
+        }
     }
 }
