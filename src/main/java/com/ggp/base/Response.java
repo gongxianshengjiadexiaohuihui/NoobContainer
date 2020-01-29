@@ -5,11 +5,10 @@ import java.io.OutputStream;
 /**
  * @author ggp
  * @Date 2020/1/29 20:07
- * @Description
- * 一个 HTTP 响应也包括三个组成部分：
- ** 方法—统一资源标识符(URI)—协议/版本
- ** 响应的头部
- ** 主体内容
+ * @Description 一个 HTTP 响应也包括三个组成部分：
+ * * 方法—统一资源标识符(URI)—协议/版本
+ * * 响应的头部
+ * * 主体内容
  * 例如：
  * 1 HTTP/1.1 200 OK
  * 2 Server: Microsoft-IIS/4.0
@@ -24,7 +23,7 @@ import java.io.OutputStream;
  * 11     </head>
  * 12     <body> Welcome to Brainy Software </body>
  * 13  </html>
- *  参考 @Request
+ * 参考 @Request
  */
 public class Response {
 
