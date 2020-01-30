@@ -1,4 +1,4 @@
-package com.ggp.base;
+package com.ggp.server;
 
 import com.ggp.common.Constants;
 

@@ -1,4 +1,4 @@
-package com.ggp.base;
+package com.ggp.server;
 
 import com.ggp.common.Constants;
 
@@ -15,7 +15,7 @@ import java.net.Socket;
  * @Description:
  */
 public class HttpServer {
-   private boolean shutdown = false;
+    private boolean shutdown = false;
 
     public static void main(String[] args) {
         HttpServer httpServer = new HttpServer();
@@ -25,12 +25,12 @@ public class HttpServer {
     private void await() {
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(Constants.DEFAULT_PORT,1, InetAddress.getByName(Constants.DEFAULT_IP));
+            serverSocket = new ServerSocket(Constants.DEFAULT_PORT, 1, InetAddress.getByName(Constants.DEFAULT_IP));
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        while (!shutdown){
+        while (!shutdown) {
             Socket socket = null;
             InputStream inputStream = null;
             OutputStream outputStream = null;
@@ -42,7 +42,22 @@ public class HttpServer {
                 request.parse();
                 Response response = new Response(outputStream);
                 response.setRequest(request);
-                response.sendStaticResource();
+                /**
+                 * servlet
+                 */
+                if (request.getUri().startsWith("/servlet")) {
+                    ServletProcessor servletProcessor = new ServletProcessor();
+                    servletProcessor.process(request, response);
+                } else {
+                    /**
+                     * 静态资源
+                     */
+                    StaticeResourceProcessor
+                }
+                //response.sendStaticResource();
+                /**
+                 * 断开握手
+                 */
                 socket.close();
                 shutdown = request.getUri().equals(Constants.SHUTDOWN_COMMAND);
             } catch (Exception e) {
