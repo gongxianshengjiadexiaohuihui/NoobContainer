@@ -46,15 +46,15 @@ public class HttpServer {
                  * servlet
                  */
                 if (request.getUri().startsWith("/servlet")) {
-                    ServletProcessor servletProcessor = new ServletProcessor();
-                    servletProcessor.process(request, response);
+                    ServletProcessor processor = new ServletProcessor();
+                    processor.process(request, response);
                 } else {
                     /**
                      * 静态资源
                      */
-                    StaticeResourceProcessor
+                    StaticResourceProcessor processor = new StaticResourceProcessor();
+                    processor.process(request,response);
                 }
-                //response.sendStaticResource();
                 /**
                  * 断开握手
                  */
