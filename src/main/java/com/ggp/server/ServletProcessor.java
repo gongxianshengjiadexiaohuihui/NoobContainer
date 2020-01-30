@@ -50,7 +50,11 @@ public class ServletProcessor implements Processor {
         Servlet servlet = null;
         try {
             servlet = (Servlet) myClass.newInstance();
-            servlet.service(request, response);
+            /**
+             * 避免暴露Request和Response自己的方法
+             * 因为 Request可以向上转型为ServletRequest,ServletRequest也可以向下转型为Request,出于安全考虑
+             */
+            servlet.service(new RequestFacade(request), new ResponseFacade(response));
         } catch (Exception e) {
             e.printStackTrace();
         }
