@@ -1,11 +1,18 @@
 package com.ggp.server;
 
+import java.io.IOException;
+
 /**
  * @author ggp
  * @Date 2020/1/30 18:13
- * @Description
+ * @Description 处理静态资源请求
  */
 public class StaticResourceProcessor implements Processor {
     public void process(Request request, Response response) {
+        try {
+            response.sendStaticResource();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

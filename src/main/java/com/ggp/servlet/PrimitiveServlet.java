@@ -45,7 +45,7 @@ public class PrimitiveServlet implements Servlet {
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         logger.debug("service");
         PrintWriter out = servletResponse.getWriter();
-        out.println("hello world");
+        out.println("hello servlet");
     }
 
     /**

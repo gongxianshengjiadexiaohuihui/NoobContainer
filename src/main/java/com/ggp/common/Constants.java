@@ -36,5 +36,8 @@ public class Constants {
                                                     +"Content-Length: 23\r\n"
                                                     +"\r\n"
                                                     +"<h1>File Not Found</h1>";
-
+    /**
+     * servlet 存放路径
+     */
+    public static final String SERVLET_PATH = "com.ggp.servlet.";
 }
