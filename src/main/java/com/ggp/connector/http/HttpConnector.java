@@ -20,6 +20,11 @@ public class HttpConnector implements Runnable {
         return scheme;
     }
 
+    /**
+     * 1、等待http请求
+     * 2、为每个请求创建HttpProcessor实例
+     * 3、调用HttpProcessor的parse方法
+     */
     public void run() {
         ServerSocket serverSocket = null;
         try {
@@ -39,6 +44,10 @@ public class HttpConnector implements Runnable {
             httpProcessor.parse(socket);
         }
     }
+
+    /**
+     * 创建线程
+     */
     public void start(){
         Thread thread = new Thread(this);
         thread.start();
