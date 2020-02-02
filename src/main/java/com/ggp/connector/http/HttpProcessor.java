@@ -2,9 +2,11 @@ package com.ggp.connector.http;
 
 import com.ggp.server.ServletProcessor;
 import com.ggp.server.StaticResourceProcessor;
+import org.apache.catalina.util.RequestUtil;
 import org.apache.catalina.util.StringManager;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -158,7 +160,7 @@ public class HttpProcessor {
         } else {
             request.setRequestURI(uri);
         }
-        if (normalizedUri == null) {
+        if (null == normalizedUri) {
             throw new ServletException("Invalid URI: " + uri + "'");
         }
     }
@@ -169,12 +171,55 @@ public class HttpProcessor {
      * 假如 uri 是正确的格式或者异常可以给纠正的话，normalize 将会返 回相同的或者被纠正后的 URI。
      * 假如 URI 不能纠正的话，它将会给认为是非法的并且通常会返回 null。
      * 在这种情况下(通常返回 null)，parseRequest 将会在方法的最后抛出一个异常
+     *
      * @param uri
      * @return
      */
     private String normalize(String uri) {
     }
 
-    private void parseHeader(SocketInputStream socketInputStream) {
+    private void parseHeader(SocketInputStream socketInputStream) throws IOException, ServletException {
+        while (true) {
+            HttpHeader httpHeader = new HttpHeader();
+            /**
+             * 填充HttpHeader实例
+             */
+            socketInputStream.readHeader(httpHeader);
+            /**
+             * 通过检测HttpHeader实例的nameEnd和valueEnd来测试是否可以从输入流中读取下一个头部信息
+             */
+            if (httpHeader.nameEnd == 0){
+                 if(httpHeader.valueEnd == 0){
+                     /**
+                      * 所有的头部属性都被解析完成，跳出循环
+                      */
+                     return;
+                 }else{
+                     throw new ServletException(stringManager.getString("httpProcessor.parseHeaders.colon"));
+                 }
+            }
+            /**
+             * 存在头部，存储头部的名称和值
+             */
+            String name = new String(httpHeader.name,0,httpHeader.nameEnd);
+            String value = new String(httpHeader.value,0,httpHeader.valueEnd);
+            request.addHeader(name,value);
+            /**
+             * 一些头部也需要某些属性设置，让其可以直接用get获得
+             */
+            if(name.equals("cookie")){
+                //todo
+            }else if(name.equals("content-length")){
+                int n = -1;
+                try {
+                    n = Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    throw new ServletException(stringManager.getString("httpProcessor.parseHeader.contentLength"));
+                }
+                request.setContentLength(value);
+            }else if(name.equals("content-type")){
+                request.setContentType(value);
+            }
+        }
     }
 }

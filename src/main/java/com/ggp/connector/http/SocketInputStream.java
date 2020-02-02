@@ -16,4 +16,8 @@ public class SocketInputStream {
     public void readRequestLine(HttpRequestLine httpRequestLine) {
 
     }
+
+    public void readHeader(HttpHeader httpHeader) {
+
+    }
 }

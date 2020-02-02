@@ -256,4 +256,8 @@ public class HttpRequest implements HttpServletRequest {
     public int getLocalPort() {
         return 0;
     }
+
+    public void addHeader(String name, String value) {
+
+    }
 }
