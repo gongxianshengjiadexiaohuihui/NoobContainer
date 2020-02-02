@@ -260,4 +260,8 @@ public class HttpRequest implements HttpServletRequest {
     public void addHeader(String name, String value) {
 
     }
+
+    public void addCookie(Cookie cookie) {
+
+    }
 }

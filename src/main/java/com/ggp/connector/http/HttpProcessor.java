@@ -1,5 +1,6 @@
 package com.ggp.connector.http;
 
+import com.ggp.common.ServletUtil;
 import com.ggp.server.ServletProcessor;
 import com.ggp.server.StaticResourceProcessor;
 import org.apache.catalina.util.RequestUtil;
@@ -208,7 +209,20 @@ public class HttpProcessor {
              * 一些头部也需要某些属性设置，让其可以直接用get获得
              */
             if(name.equals("cookie")){
-                //todo
+                 Cookie[] cookies = ServletUtil.parseCookieHeader(value);
+                for (int i = 0; i <cookies.length ; i++) {
+                    /**
+                     * 如果cookie中有sessionId,那么就会以cookie的为准，替换URL中的
+                     */
+                    if(cookies[i].getName().equals("jsessionid")){
+                        if(!request.isRequestedSessionIdFromCookie()){
+                            request.setRequestedSessionId(cookies[i].getValue());
+                            request.setRequestedSessionCookie(true);
+                            request.setRequestedSessionURL(false);
+                        }
+                    }
+                    request.addCookie(cookies[i]);
+                }
             }else if(name.equals("content-length")){
                 int n = -1;
                 try {
