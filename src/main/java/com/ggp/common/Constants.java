@@ -32,12 +32,16 @@ public class Constants {
      * 错误消息 404
      */
     public static final String ERROR_MESSAGE_404 = "HTTP/1.1 404 File Not Found\r\n"
-                                                    +"Content-Type: text/html\r\n"
-                                                    +"Content-Length: 23\r\n"
-                                                    +"\r\n"
-                                                    +"<h1>File Not Found</h1>";
+            + "Content-Type: text/html\r\n"
+            + "Content-Length: 23\r\n"
+            + "\r\n"
+            + "<h1>File Not Found</h1>";
     /**
      * servlet 存放路径
      */
     public static final String SERVLET_PATH = "com.ggp.servlet.";
+    /**
+     * 默认编码字符集
+     */
+    public static final String DEFAULT_CHARACTER_ENCODING = "UTF-8";
 }
