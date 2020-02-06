@@ -1,4 +1,4 @@
-package com.ggp.server;
+package com.ggp.simplecontainer;
 
 import java.io.IOException;
 

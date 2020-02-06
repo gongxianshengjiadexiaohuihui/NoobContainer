@@ -1,9 +1,9 @@
 package com.ggp.connector.http;
 
 import com.ggp.common.ServletUtil;
-import com.ggp.server.ServletProcessor;
-import com.ggp.server.StaticResourceProcessor;
-import org.apache.catalina.util.RequestUtil;
+import com.ggp.connector.io.SocketInputStream;
+import com.ggp.simplecontainer.ServletProcessor;
+import com.ggp.simplecontainer.StaticResourceProcessor;
 import org.apache.catalina.util.StringManager;
 
 import javax.servlet.ServletException;

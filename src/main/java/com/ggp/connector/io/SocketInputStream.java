@@ -1,4 +1,7 @@
-package com.ggp.connector.http;
+package com.ggp.connector.io;
+
+import com.ggp.connector.http.HttpHeader;
+import com.ggp.connector.http.HttpRequestLine;
 
 import java.io.InputStream;
 

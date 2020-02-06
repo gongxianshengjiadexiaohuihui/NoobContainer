@@ -1,4 +1,4 @@
-package com.ggp.server;
+package com.ggp.simplecontainer;
 
 import org.apache.log4j.Logger;
 

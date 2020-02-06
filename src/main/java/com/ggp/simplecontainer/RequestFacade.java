@@ -1,4 +1,4 @@
-package com.ggp.server;
+package com.ggp.simplecontainer;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;

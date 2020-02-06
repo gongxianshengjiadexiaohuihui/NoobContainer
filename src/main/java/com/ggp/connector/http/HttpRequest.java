@@ -1,6 +1,8 @@
 package com.ggp.connector.http;
 
 import com.ggp.common.Constants;
+import com.ggp.connector.io.RequestStream;
+import com.ggp.connector.io.SocketInputStream;
 import org.apache.catalina.util.ParameterMap;
 import org.apache.catalina.util.RequestUtil;
 
@@ -11,7 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.security.Principal;
 import java.util.*;
 
@@ -26,9 +31,57 @@ import java.util.*;
  */
 public class HttpRequest implements HttpServletRequest {
     /**
+     * 请求的内容类型
+     */
+    private String contentType;
+    /**
+     * 请求内容长度
+     */
+    private int contentLength;
+    private InetAddress inetAddress;
+    /**
+     * 输入流
+     */
+    private InputStream inputStream;
+    /**
+     * 请求方法 位于请求行
+     */
+    private String method;
+    /**
+     * 请求协议 位于请求行
+     */
+    private String protocol;
+    /**
+     * 查询字符串 位于请求行
+     */
+    private String queryString;
+    /**
+     * 请求uri 位于请求行
+     */
+    private String requestURI;
+    private String serverName;
+    private int serverPort;
+    private Socket socket;
+    private boolean requestedSessionCookie;
+    private String requestedSessionId;
+    private boolean requestedSessionURL;
+
+    /**
+     * 请求属性
+     */
+    protected HashMap attributes = new HashMap();
+    /**
+     * 与此请求一同发送的授权凭证
+     */
+    protected String authorization = null;
+    /**
+     * 此请求的上下文路径
+     */
+    protected String contextPath = "";
+    /**
      * 头部
      */
-    protected HashMap headers = new HashMap();
+    protected HashMap<String,String> headers = new HashMap();
     /**
      * cookies
      */
@@ -41,11 +94,38 @@ public class HttpRequest implements HttpServletRequest {
      * 判断是否已经解析过参数
      */
     protected boolean parsed = false;
+    protected BufferedReader reader = null;
+    protected ServletInputStream servletInputStream = null;
 
-    public HttpRequest(SocketInputStream socketInputStream) {
+    public HttpRequest(InputStream inputStream) {
+         this.inputStream = inputStream;
+    }
+    //todo 有争议
 
+    /**
+     * 添加头部属性
+     * @param name
+     * @param value
+     */
+    public void addHeader(String name,String value){
+         name = name.toLowerCase();
+         synchronized (headers){
+             String result = headers.get(name);
+             if(null == result){
+                 headers.put(name,value);
+             }
+         }
     }
 
+    /**
+     * 添加cookie
+     * @param cookie
+     */
+    public void addCookie(Cookie cookie){
+        synchronized (cookies){
+            cookies.add(cookie);
+        }
+    }
     /**
      * 解析参数，参数可能存在于查询字符串或者是请求内容中
      */
@@ -120,10 +200,26 @@ public class HttpRequest implements HttpServletRequest {
                 RequestUtil.parseParameters(results, buffer, encoding);
             } catch (IOException e) {
                 e.printStackTrace();
+                throw new RuntimeException("Content read fail");
             }
         }
+        //todo  多线程会有问题
+        /**
+         * 锁定结果
+         */
+        results.setLocked(true);
+        parsed = true;
+        parameters = results;
     }
-
+    public ServletInputStream createServletInputStream(){
+        return (new RequestStream(this));
+    }
+    public InputStream getStream(){
+        return this.inputStream;
+    }
+    /**
+     * 下面是继承HttpServletRequest的方法
+     */
     public String getAuthType() {
         return null;
     }
@@ -340,11 +436,4 @@ public class HttpRequest implements HttpServletRequest {
         return 0;
     }
 
-    public void addHeader(String name, String value) {
-
-    }
-
-    public void addCookie(Cookie cookie) {
-
-    }
 }
