@@ -144,6 +144,6 @@ public class ResponseStream extends ServletOutputStream {
         return closed;
     }
     void reset(){
-        count = 0
+        count = 0;
     }
 }

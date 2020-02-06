@@ -138,17 +138,17 @@ public class HttpProcessor {
             String rest = uri.substring(semicolon + match.length());
             int semicolon2 = rest.indexOf(';');
             if (semicolon2 >= 0) {
-                request.setRequestSessionId(rest.substring(0, semicolon2));
+                request.setRequestedSessionId(rest.substring(0, semicolon2));
                 rest = rest.substring(semicolon2);
             } else {
-                request.setRequestSessionId(rest);
+                request.setRequestedSessionId(rest);
                 rest = "";
             }
-            request.setRequestSessionURL(true);
+            request.setRequestedSessionURL(true);
             uri = uri.substring(0, semicolon) + rest;
         } else {
-            request.setRequestSessionId(null);
-            request.setRequestSessionURL(false);
+            request.setRequestedSessionId(null);
+            request.setRequestedSessionURL(false);
         }
         /**
          * 如 URI 不能纠正的话，它将会给认为是非法的并且通常会返回 null。

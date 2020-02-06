@@ -3,6 +3,7 @@ package com.ggp.connector.http;
 import com.ggp.common.Constants;
 import com.ggp.connector.io.RequestStream;
 import com.ggp.connector.io.SocketInputStream;
+import org.apache.catalina.util.Enumerator;
 import org.apache.catalina.util.ParameterMap;
 import org.apache.catalina.util.RequestUtil;
 
@@ -11,13 +12,12 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.Principal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -62,8 +62,17 @@ public class HttpRequest implements HttpServletRequest {
     private String serverName;
     private int serverPort;
     private Socket socket;
+    /**
+     * 标记是否有来自cookie的会话id
+     */
     private boolean requestedSessionCookie;
+    /**
+     * 会话id
+     */
     private String requestedSessionId;
+    /**
+     * 标记是否有来自url的会话id
+     */
     private boolean requestedSessionURL;
 
     /**
@@ -79,9 +88,9 @@ public class HttpRequest implements HttpServletRequest {
      */
     protected String contextPath = "";
     /**
-     * 头部
+     * 头部 可能存在多个请求头名相同
      */
-    protected HashMap<String,String> headers = new HashMap();
+    protected HashMap headers = new HashMap();
     /**
      * cookies
      */
@@ -94,38 +103,52 @@ public class HttpRequest implements HttpServletRequest {
      * 判断是否已经解析过参数
      */
     protected boolean parsed = false;
+    protected String pathInfo = null;
     protected BufferedReader reader = null;
     protected ServletInputStream servletInputStream = null;
+    /**
+     * 时间格式
+     */
+    protected SimpleDateFormat[] formats = {
+            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.CHINA),
+            new SimpleDateFormat("EEEEEE, dd-MMM-yy HH:mm:ss zzz", Locale.CHINA),
+            new SimpleDateFormat("EEE MMMM d HH:mm:ss yyyy", Locale.CHINA)
+    };
 
     public HttpRequest(InputStream inputStream) {
-         this.inputStream = inputStream;
+        this.inputStream = inputStream;
     }
     //todo 有争议
 
     /**
      * 添加头部属性
+     *
      * @param name
      * @param value
      */
-    public void addHeader(String name,String value){
-         name = name.toLowerCase();
-         synchronized (headers){
-             String result = headers.get(name);
-             if(null == result){
-                 headers.put(name,value);
-             }
-         }
+    public void addHeader(String name, String value) {
+        name = name.toLowerCase();
+        synchronized (headers) {
+            ArrayList values = (ArrayList) headers.get(name);
+            if (null == values) {
+                values = new ArrayList();
+                headers.put(name, value);
+            }
+            values.add(value);
+        }
     }
 
     /**
      * 添加cookie
+     *
      * @param cookie
      */
-    public void addCookie(Cookie cookie){
-        synchronized (cookies){
+    public void addCookie(Cookie cookie) {
+        synchronized (cookies) {
             cookies.add(cookie);
         }
     }
+
     /**
      * 解析参数，参数可能存在于查询字符串或者是请求内容中
      */
@@ -211,12 +234,100 @@ public class HttpRequest implements HttpServletRequest {
         parsed = true;
         parameters = results;
     }
-    public ServletInputStream createServletInputStream(){
+
+    /**
+     * 获取带contentLength限制的输入流
+     *
+     * @return
+     */
+    public ServletInputStream createServletInputStream() {
         return (new RequestStream(this));
     }
-    public InputStream getStream(){
+
+    /**
+     * 获得基础流
+     *
+     * @return
+     */
+    public InputStream getStream() {
         return this.inputStream;
     }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public void setContentLength(int contentLength) {
+        this.contentLength = contentLength;
+    }
+
+    public void setInetAddress(InetAddress inetAddress) {
+        this.inetAddress = inetAddress;
+    }
+    public void setAuthorization(String authorization) {
+        this.authorization = authorization;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public void setQueryString(String queryString) {
+        this.queryString = queryString;
+    }
+
+    public void setRequestURI(String requestURI) {
+        this.requestURI = requestURI;
+    }
+
+    public void setPathInfo(String path) {
+        this.pathInfo = path;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
+    }
+
+    /**
+     * 设置一个标记，指明有来自cookie的会话id
+     *
+     * @param requestedSessionCookie
+     */
+    public void setRequestedSessionCookie(boolean requestedSessionCookie) {
+        this.requestedSessionCookie = requestedSessionCookie;
+    }
+
+    /**
+     * 设置会话id
+     *
+     * @param requestedSessionId
+     */
+    public void setRequestedSessionId(String requestedSessionId) {
+        this.requestedSessionId = requestedSessionId;
+    }
+
+    /**
+     * 设置一个标记，指明是否有来自URL的会话id
+     *
+     * @param requestedSessionURL
+     */
+    public void setRequestedSessionURL(boolean requestedSessionURL) {
+        this.requestedSessionURL = requestedSessionURL;
+    }
+
+
     /**
      * 下面是继承HttpServletRequest的方法
      */
@@ -225,35 +336,81 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     public Cookie[] getCookies() {
-        return new Cookie[0];
+        synchronized (cookies) {
+            if (cookies.size() < 1) {
+                return null;
+            }
+            Cookie[] results = new Cookie[cookies.size()];
+            return (Cookie[]) cookies.toArray(results);
+        }
     }
 
-    public long getDateHeader(String s) {
-        return 0;
+    public long getDateHeader(String name) {
+        String value = getHeader(name);
+        /**
+         *  Work around a bug in SimpleDateFormat in pre-JDK1.2b4
+         *  (Bug Parade bug #4106807)
+         */
+        value += " ";
+        /**
+         * 尝试用不同格式解析时间
+         */
+        for (int i = 0; i < formats.length; i++) {
+            try {
+                Date date = formats[i].parse(value);
+                return (date.getTime());
+            } catch (ParseException e) {
+                ;
+            }
+        }
+        throw new IllegalArgumentException(value);
     }
 
-    public String getHeader(String s) {
-        return null;
-    }
-
-    public Enumeration getHeaders(String s) {
-        return null;
+    public String getHeader(String name) {
+        name = name.toLowerCase();
+        synchronized (headers) {
+            ArrayList values = (ArrayList) headers.get(name);
+            if (null != values) {
+                return (String) values.get(0);
+            } else {
+                return null;
+            }
+        }
     }
 
     public Enumeration getHeaderNames() {
-        return null;
+        synchronized (headers) {
+            return (new Enumerator(headers.keySet()));
+        }
     }
 
-    public int getIntHeader(String s) {
-        return 0;
+    public Enumeration getHeaders(String name) {
+        name = name.toLowerCase();
+        synchronized (headers) {
+            ArrayList values = (ArrayList) headers.get(name);
+            if (null != values) {
+                return (new Enumerator(values));
+            } else {
+                return (new Enumerator(new ArrayList()));
+            }
+        }
+    }
+
+    public int getIntHeader(String name) {
+        String value = getHeader(name);
+        if (null == value) {
+            return -1;
+        } else {
+            return (Integer.parseInt(value));
+        }
     }
 
     public String getMethod() {
-        return null;
+        return method;
     }
 
     public String getPathInfo() {
-        return null;
+        return pathInfo;
     }
 
     public String getPathTranslated() {
@@ -261,11 +418,11 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     public String getContextPath() {
-        return null;
+        return contextPath;
     }
 
     public String getQueryString() {
-        return null;
+        return queryString;
     }
 
     public String getRemoteUser() {
@@ -285,7 +442,7 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     public String getRequestURI() {
-        return null;
+        return requestURI;
     }
 
     public StringBuffer getRequestURL() {
@@ -337,35 +494,49 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     public int getContentLength() {
-        return 0;
+        return contentLength;
     }
 
     public String getContentType() {
-        return null;
+        return contentType;
     }
 
     public ServletInputStream getInputStream() throws IOException {
         return null;
     }
 
-    public String getParameter(String s) {
-        return null;
+    public String getParameter(String name) {
+        parseParameters();
+        String[] values = (String[]) parameters.get(name);
+        if (null != values) {
+            return values[0];
+        } else {
+            return null;
+        }
     }
 
     public Enumeration getParameterNames() {
-        return null;
+        parseParameters();
+        return (new Enumerator(parameters.keySet()));
     }
 
-    public String[] getParameterValues(String s) {
-        return new String[0];
+    public String[] getParameterValues(String name) {
+        parseParameters();
+        String[] values = (String[]) parameters.get(name);
+        if (null != values) {
+            return values;
+        } else {
+            return null;
+        }
     }
 
     public Map getParameterMap() {
-        return null;
+        parseParameters();
+        return parameters;
     }
 
     public String getProtocol() {
-        return null;
+        return protocol;
     }
 
     public String getScheme() {
@@ -377,11 +548,26 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     public int getServerPort() {
-        return 0;
+        return serverPort;
     }
 
+    /**
+     * 要么使用bufferReader要么使用servletInputStream
+     * @return
+     * @throws IOException
+     */
     public BufferedReader getReader() throws IOException {
-        return null;
+        if (null != servletInputStream) {
+            throw new IllegalStateException("getInputStream has been called.");
+        }
+        if(null == reader){
+            String encoding = getCharacterEncoding();
+            if(null == encoding){
+                encoding = Constants.DEFAULT_CHARACTER_ENCODING;
+            }
+            reader = new BufferedReader(new InputStreamReader(createServletInputStream(),encoding));
+        }
+        return reader;
     }
 
     public String getRemoteAddr() {

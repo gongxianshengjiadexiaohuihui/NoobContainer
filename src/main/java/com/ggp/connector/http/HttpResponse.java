@@ -26,4 +26,7 @@ public class HttpResponse {
 
     public void write(int b) {
     }
+
+    public void write(byte[] bytes, int off, int actuallyLen) {
+    }
 }
