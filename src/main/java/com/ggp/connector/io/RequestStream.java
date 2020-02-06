@@ -11,6 +11,7 @@ import java.io.InputStream;
  * @author ggp
  * @Date 2020/2/6 16:18
  * @Description
+ * 如果关联的HttpRequest中contentLength已经设置
  * RequestStream流读取的时候有长度限制，不能超过ContentLength
  */
 public class RequestStream extends ServletInputStream {
@@ -121,6 +122,9 @@ public class RequestStream extends ServletInputStream {
                 actuallyReadLength = length - count;
             }
         }
+        /**
+         * 最终还是会调用read()方法
+         */
         return super.read(bytes,off,actuallyReadLength);
     }
 }

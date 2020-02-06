@@ -20,4 +20,10 @@ public class HttpResponse {
     public void setHeader(String server, String noob_servlet_container) {
 
     }
+
+    public void flushBuffer() {
+    }
+
+    public void write(int b) {
+    }
 }
