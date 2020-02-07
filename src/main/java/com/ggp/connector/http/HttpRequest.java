@@ -127,7 +127,6 @@ public class HttpRequest implements HttpServletRequest {
      * @param value
      */
     public void addHeader(String name, String value) {
-        name = name.toLowerCase();
         synchronized (headers) {
             ArrayList values = (ArrayList) headers.get(name);
             if (null == values) {
@@ -367,7 +366,6 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     public String getHeader(String name) {
-        name = name.toLowerCase();
         synchronized (headers) {
             ArrayList values = (ArrayList) headers.get(name);
             if (null != values) {
@@ -385,7 +383,6 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     public Enumeration getHeaders(String name) {
-        name = name.toLowerCase();
         synchronized (headers) {
             ArrayList values = (ArrayList) headers.get(name);
             if (null != values) {
