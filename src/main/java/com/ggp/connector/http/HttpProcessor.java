@@ -180,6 +180,9 @@ public class HttpProcessor {
     }
 
     private void parseHeader(SocketInputStream socketInputStream) throws IOException, ServletException {
+        /**
+         * 循环读取所有的header属性
+         */
         while (true) {
             HttpHeader httpHeader = new HttpHeader();
             /**

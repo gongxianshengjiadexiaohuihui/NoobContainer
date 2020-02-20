@@ -4,6 +4,7 @@ package com.ggp.connector.http;
  * @author ggp
  * @Date 2020/2/2 13:23
  * @Description
+ * http请求头信息（单个请求头）
  */
 public class HttpHeader {
     /**

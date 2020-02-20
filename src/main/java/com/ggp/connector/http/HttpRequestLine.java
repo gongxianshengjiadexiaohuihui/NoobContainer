@@ -13,9 +13,12 @@ public class HttpRequestLine {
     public static final int INITIAL_URI_SIZE = 64;
     public static final int INITIAL_PROTOCOL_SIZE = 8;
     public static final int MAX_METHOD_SIZE = 1024;
-    public static final int MAX_URI_SIZE = 1024;
+    public static final int MAX_URI_SIZE = 32768;
     public static final int MAX_PROTOCOL_SIZE = 1024;
 
+    /**
+     * end标识该数组的最后一个字符对应的下标
+     */
     public char[] method;
     public int methodEnd;
     public char[] uri;

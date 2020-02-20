@@ -2,7 +2,6 @@ package com.ggp.connector.http;
 
 import com.ggp.common.Constants;
 import com.ggp.connector.io.RequestStream;
-import com.ggp.connector.io.SocketInputStream;
 import org.apache.catalina.util.Enumerator;
 import org.apache.catalina.util.ParameterMap;
 import org.apache.catalina.util.RequestUtil;

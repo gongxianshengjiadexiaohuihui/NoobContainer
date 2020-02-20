@@ -44,4 +44,5 @@ public class Constants {
      * 默认编码字符集
      */
     public static final String DEFAULT_CHARACTER_ENCODING = "UTF-8";
+
 }
