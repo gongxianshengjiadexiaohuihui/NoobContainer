@@ -1,6 +1,7 @@
-package com.ggp.connector.http;
+package com.ggp.connector.processor;
 
 import com.ggp.common.ServletUtil;
+import com.ggp.connector.http.*;
 import com.ggp.connector.io.SocketInputStream;
 import com.ggp.simplecontainer.ServletProcessor;
 import com.ggp.simplecontainer.StaticResourceProcessor;
@@ -23,6 +24,13 @@ public class HttpProcessor {
     private HttpResponse response;
     private HttpRequestLine httpRequestLine = new HttpRequestLine();
 
+    protected String method;
+    protected String queryString;
+
+    public HttpProcessor(HttpConnector connector){
+        this.connector = connector;
+    }
+
     /**
      * 错误信息管理
      */
@@ -36,7 +44,7 @@ public class HttpProcessor {
      *
      * @param socket
      */
-    public void parse(Socket socket) {
+    public void process(Socket socket) {
         SocketInputStream socketInputStream = null;
         OutputStream outputStream = null;
 
@@ -47,12 +55,15 @@ public class HttpProcessor {
             response = new HttpResponse(outputStream);
             response.setRequest(request);
             response.setHeader("Server", "Noob Servlet Container");
+            /**
+             * 解析请求行
+             */
             parseRequest(socketInputStream, outputStream);
             parseHeader(socketInputStream);
             /**
              * servlet
              */
-            if (request.getUri().startsWith("/servlet")) {
+            if (request.getRequestURI().startsWith("/servlet")) {
                 ServletProcessor processor = new ServletProcessor();
                 processor.process(request, response);
             } else {
@@ -110,7 +121,7 @@ public class HttpProcessor {
          * http://www.brainysoftware.com/index.html?name=Tarzan
          * 需要兼容这种情况
          */
-        if (!uri.endsWith("/")) {
+        if (!uri.startsWith("/")) {
             int pos = uri.indexOf("://");
             if (pos != -1) {
                 pos = uri.indexOf("/", pos + 3);
@@ -122,15 +133,16 @@ public class HttpProcessor {
             }
         }
         /**
-         *  查询字符串也可以包含一个会话标识符，用 jsessionid 参数名来指代。
+         *  URI可以包含一个会话标识符，用 jsessionid 参数名来指代。
          *  因此， parseRequest 方法也检查一个会话标识符。
-         *  假如在查询字符串里边找到 jessionid，方法就取得会话标识符，
+         *  假如在 URI里边找到 jessionid，方法就取得会话标识符，
          *  并通过调用 setRequestedSessionId 方法把值交给 HttpRequest 实例
          *
-         *  当 jsessionid 被找到，也意味着会话标识符是携带在查询字符串里边，而不是在 cookie 里边。
+         *  当 jsessionid 被找到，也意味着会话标识符是携带在 URI里边，而不是在 cookie 里边。
          *  因此，传递 true 给 request 的 setRequestSessionURL 方法。
          *  否则，传递 false 给 setRequestSessionURL 方法并传递 null 给 setRequestedSessionURL 方法。
          *  到这个时候，uri 的值已经被去掉了 jsessionid
+         *  http://localhost:81/stub_test/old_content;jsessionid=F0D358CE192599DE7BF6AD271394D3BF;xx=xx
          */
         String match = ";jsessionid=";
         int semicolon = uri.indexOf(match);
@@ -145,6 +157,9 @@ public class HttpProcessor {
                 rest = "";
             }
             request.setRequestedSessionURL(true);
+            /**
+             * 拿掉sessionID
+             */
             uri = uri.substring(0, semicolon) + rest;
         } else {
             request.setRequestedSessionId(null);
@@ -173,10 +188,81 @@ public class HttpProcessor {
      * 假如 URI 不能纠正的话，它将会给认为是非法的并且通常会返回 null。
      * 在这种情况下(通常返回 null)，parseRequest 将会在方法的最后抛出一个异常
      *
-     * @param uri
+     * @param path
      * @return
      */
-    private String normalize(String uri) {
+    private String normalize(String path) {
+        if(null == path){
+            return null;
+        }
+        /**
+         * 由于历史原因，目前尚存在一些不标准的编码实现。例如对于~符号，
+         * 虽然RFC3986文档规定，对于波浪符号~，不需要进行Url编码，但是还是有很多老的网关或者传输代理会
+         */
+        if(path.startsWith("/%7E")||path.startsWith("/%7e")){
+            path = "/~"+path.substring(4);
+        }
+        /**
+         * 禁止转意 ‘%’ ‘，’ ‘.’这些特殊保留字符
+         */
+        if(path.indexOf("%25")>=0||path.indexOf("%2f")>=0||path.indexOf("%2F")>=0||path.indexOf("%2E")>=0||path.indexOf("%2e")>=0||path.indexOf("5c")>=0||path.indexOf("5C")>=0){
+            return null;
+        }
+        if(path.indexOf("/.")>=0){
+            return "/";
+        }
+        /**
+         * 标准化斜杠，必要时添加前导斜杠
+         */
+        if(path.indexOf("//")>=0){
+            path = path.replace('\\','/');
+        }
+        if(!path.startsWith("/")){
+            path = path+"/";
+        }
+        /**
+         * 去除连续/替换成/
+         * 比如//..+n
+         */
+        while(true){
+            int index = path.indexOf("//");
+            if(index < 0){
+                break;
+            }
+            path = path.substring(0,index)+path.substring(index+1);
+        }
+        /**
+         * 同上 去除/./
+         */
+        while (true){
+            int index = path.indexOf("/./");
+            if(index<0){
+                break;
+            }
+            path = path.substring(0,index)+path.substring(index+2);
+        }
+        /**
+         * /../是返回上一级目录
+         * /usr/local/../index.html ---->  /usr/index.html
+         */
+        while (true){
+            int index = path.indexOf("/../");
+            if(index < 0){
+                break;
+            }
+            if(index == 0){
+                return null;
+            }
+            int index2 = path.lastIndexOf('/',index-1);
+            path = path.substring(0,index2)+path.substring(index+3);
+        }
+        /**
+         * 三个点或以上是无效的
+         */
+        if(path.indexOf("/...")>0){
+            return null;
+        }
+        return path;
     }
 
     private void parseHeader(SocketInputStream socketInputStream) throws IOException, ServletException {
@@ -233,7 +319,7 @@ public class HttpProcessor {
                 } catch (NumberFormatException e) {
                     throw new ServletException(stringManager.getString("httpProcessor.parseHeader.contentLength"));
                 }
-                request.setContentLength(value);
+                request.setContentLength(n);
             }else if(name.equals("content-type")){
                 request.setContentType(value);
             }

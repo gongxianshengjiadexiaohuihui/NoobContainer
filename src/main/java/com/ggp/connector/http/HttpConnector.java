@@ -1,6 +1,7 @@
 package com.ggp.connector.http;
 
 import com.ggp.common.Constants;
+import com.ggp.connector.processor.HttpProcessor;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -41,7 +42,7 @@ public class HttpConnector implements Runnable {
                 continue;
             }
             HttpProcessor httpProcessor = new HttpProcessor();
-            httpProcessor.parse(socket);
+            httpProcessor.process(socket);
         }
     }
 
