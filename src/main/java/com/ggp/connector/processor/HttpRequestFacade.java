@@ -72,174 +72,174 @@ public class HttpRequestFacade implements HttpServletRequest {
     }
 
     public String getQueryString() {
-        return null;
+        return request.getQueryString();
     }
 
     public String getRemoteUser() {
-        return null;
+        return request.getRemoteUser();
     }
 
     public boolean isUserInRole(String role) {
-        return false;
+        return request.isUserInRole(role);
     }
 
     public Principal getUserPrincipal() {
-        return null;
+        return request.getUserPrincipal();
     }
 
     public String getRequestedSessionId() {
-        return null;
+        return request.getRequestedSessionId();
     }
 
     public String getRequestURI() {
-        return null;
+        return request.getRequestURI();
     }
 
     public StringBuffer getRequestURL() {
-        return null;
+        return request.getRequestURL();
     }
 
     public String getServletPath() {
-        return null;
+        return request.getServletPath();
     }
 
     public HttpSession getSession(boolean create) {
-        return null;
+        return request.getSession(create);
     }
 
     public HttpSession getSession() {
-        return null;
+        return request.getSession();
     }
 
     public boolean isRequestedSessionIdValid() {
-        return false;
+        return request.isRequestedSessionIdValid();
     }
 
     public boolean isRequestedSessionIdFromCookie() {
-        return false;
+        return request.isRequestedSessionIdFromCookie();
     }
 
     public boolean isRequestedSessionIdFromURL() {
-        return false;
+        return request.isRequestedSessionIdFromURL();
     }
 
     public boolean isRequestedSessionIdFromUrl() {
-        return false;
+        return request.isRequestedSessionIdFromUrl();
     }
 
     public Object getAttribute(String name) {
-        return null;
+        return request.getAttribute(name);
     }
 
     public Enumeration getAttributeNames() {
-        return null;
+        return request.getAttributeNames();
     }
 
     public String getCharacterEncoding() {
-        return null;
+        return request.getCharacterEncoding();
     }
 
     public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
-
+             request.setCharacterEncoding(env);
     }
 
     public int getContentLength() {
-        return 0;
+        return request.getContentLength();
     }
 
     public String getContentType() {
-        return null;
+        return request.getContentType();
     }
 
     public ServletInputStream getInputStream() throws IOException {
-        return null;
+        return request.getInputStream();
     }
 
     public String getParameter(String name) {
-        return null;
+        return request.getParameter(name);
     }
 
     public Enumeration getParameterNames() {
-        return null;
+        return request.getParameterNames();
     }
 
     public String[] getParameterValues(String name) {
-        return new String[0];
+        return request.getParameterValues(name);
     }
 
     public Map getParameterMap() {
-        return null;
+        return request.getParameterMap();
     }
 
     public String getProtocol() {
-        return null;
+        return request.getProtocol();
     }
 
     public String getScheme() {
-        return null;
+        return request.getScheme();
     }
 
     public String getServerName() {
-        return null;
+        return request.getServerName();
     }
 
     public int getServerPort() {
-        return 0;
+        return request.getServerPort();
     }
 
     public BufferedReader getReader() throws IOException {
-        return null;
+        return request.getReader();
     }
 
     public String getRemoteAddr() {
-        return null;
+        return request.getRemoteAddr();
     }
 
     public String getRemoteHost() {
-        return null;
+        return request.getRemoteHost();
     }
 
     public void setAttribute(String name, Object o) {
-
+            request.setAttribute(name,o);
     }
 
     public void removeAttribute(String name) {
-
+            request.removeAttribute(name);
     }
 
     public Locale getLocale() {
-        return null;
+        return request.getLocale();
     }
 
     public Enumeration getLocales() {
-        return null;
+        return request.getLocales();
     }
 
     public boolean isSecure() {
-        return false;
+        return request.isSecure();
     }
 
     public RequestDispatcher getRequestDispatcher(String path) {
-        return null;
+        return request.getRequestDispatcher(path);
     }
 
     public String getRealPath(String path) {
-        return null;
+        return request.getRealPath(path);
     }
 
     public int getRemotePort() {
-        return 0;
+        return request.getRemotePort();
     }
 
     public String getLocalName() {
-        return null;
+        return request.getLocalName();
     }
 
     public String getLocalAddr() {
-        return null;
+        return request.getLocalAddr();
     }
 
     public int getLocalPort() {
-        return 0;
+        return request.getLocalPort();
     }
 }

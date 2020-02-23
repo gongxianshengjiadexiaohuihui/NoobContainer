@@ -3,10 +3,7 @@ package com.ggp.connector.processor;
 import com.ggp.common.ServletUtil;
 import com.ggp.connector.http.*;
 import com.ggp.connector.io.SocketInputStream;
-import com.ggp.simplecontainer.ServletProcessor;
-import com.ggp.simplecontainer.StaticResourceProcessor;
 import org.apache.catalina.util.StringManager;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import java.io.IOException;

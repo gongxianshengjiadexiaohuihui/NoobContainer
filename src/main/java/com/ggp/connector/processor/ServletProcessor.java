@@ -57,7 +57,7 @@ public class ServletProcessor implements Processor {
              * 避免暴露Request和Response自己的方法
              * 因为 Request可以向上转型为ServletRequest,ServletRequest也可以向下转型为Request,出于安全考虑
              */
-            servlet.service(new RequestFacade(request), new ResponseFacade(response));
+            servlet.service(new HttpRequestFacade(request), new HttpResponseFacade(response));
             response.finishResponse();
         } catch (Exception e) {
             e.printStackTrace();

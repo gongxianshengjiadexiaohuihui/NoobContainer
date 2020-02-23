@@ -123,7 +123,7 @@ public class SocketInputStream extends InputStream {
             if (readCount >= maxRead) {
                 if (maxRead * 2 <= attribute.getMaxSize()) {
                     char[] newBuffer = new char[maxRead * 2];
-                    System.arraycopy(buffer, 0, newBuffer, 0, buffer.length);
+                    System.arraycopy(attribute.attribute, 0, newBuffer, 0, maxRead);
                     attribute.setAttribute(newBuffer);
                 } else {
                     throw new IOException(stringManager.getString("socketInputStream.readAttribute.extendError"));
@@ -213,14 +213,16 @@ public class SocketInputStream extends InputStream {
         int readCount = 0;
         boolean colon = false;
         while (!colon) {
-            if (maxRead * 2 <= HttpHeader.MAX_NAME_SIZE) {
-                char[] newBuffer = new char[2 * maxRead];
-                System.arraycopy(header.name, 0, newBuffer, 0, maxRead);
-                header.name = newBuffer;
-                maxRead = header.name.length;
-            } else {
-                throw new IOException
-                        (stringManager.getString("requestStream.readHeader.tooLong"));
+            if(readCount >= maxRead) {
+                if (maxRead * 2 <= HttpHeader.MAX_NAME_SIZE) {
+                    char[] newBuffer = new char[2 * maxRead];
+                    System.arraycopy(header.name, 0, newBuffer, 0, maxRead);
+                    header.name = newBuffer;
+                    maxRead = header.name.length;
+                } else {
+                    throw new IOException
+                            (stringManager.getString("requestStream.readHeader.tooLong"));
+                }
             }
             /**
              * 如果缓冲区数据被读完，重新刷新缓冲区
